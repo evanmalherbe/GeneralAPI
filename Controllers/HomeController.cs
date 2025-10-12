@@ -21,18 +21,17 @@ namespace GeneralAPI.Controllers
             _context = context;
         }
 
-        // GET: api/Home
+        // GET: 
         [HttpGet]
         public async Task<ActionResult<List<FrameworkResponseDTO>>> GetFramework()
         {
           List<Framework> list = await _context.Framework.Where(i => i.IsDisplay == true).ToListAsync();
           if (list.Count > 0)
           {
-            
             return list.Select(i => new FrameworkResponseDTO() { ID = i.ID, Name = i.Name}).ToList();
           }
 
-          return NotFound();
+          return NotFound(new List<FrameworkResponseDTO>());
         }
 
         // GET: api/Home/5
