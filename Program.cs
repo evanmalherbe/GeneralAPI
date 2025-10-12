@@ -2,9 +2,22 @@
 using Microsoft.Extensions.DependencyInjection;
 using GeneralAPI.Data;
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<PlatformAlphaContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("PlatformAlphaContext") ?? throw new InvalidOperationException("Connection string 'PlatformAlphaContext' not found.")));
+//builder.Services.AddDbContext<PlatformAlphaContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("PlatformAlphaContext") ?? throw new InvalidOperationException("Connection string 'PlatformAlphaContext' not found.")));
 
+// Include retry settings for when server is asleep and takes long to respond
+builder.Services.AddDbContext<PlatformAlphaContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("PlatformAlphaContext") 
+    ?? throw new InvalidOperationException("Connection string 'PlatformAlphaContext' not found."),
+    sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,        // The maximum number of times to retry (e.g., 5 times)
+                maxRetryDelay: TimeSpan.FromSeconds(30), // The maximum delay (e.g., 30 seconds)
+                errorNumbersToAdd: null   // Use the default list of transient SQL error codes
+            );
+        }
+    ));
 // Add services to the container.
 
 builder.Services.AddControllers();

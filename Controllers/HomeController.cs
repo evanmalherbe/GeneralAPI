@@ -10,7 +10,7 @@ using GeneralAPI.Models;
 
 namespace GeneralAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/framework")]
     [ApiController]
     public class HomeController : ControllerBase
     {
@@ -23,12 +23,13 @@ namespace GeneralAPI.Controllers
 
         // GET: api/Home
         [HttpGet]
-        public async Task<ActionResult<List<Framework>>> GetFramework()
+        public async Task<ActionResult<List<FrameworkResponseDTO>>> GetFramework()
         {
           List<Framework> list = await _context.Framework.Where(i => i.IsDisplay == true).ToListAsync();
           if (list.Count > 0)
           {
-            return await _context.Framework.ToListAsync();
+            
+            return list.Select(i => new FrameworkResponseDTO() { ID = i.ID, Name = i.Name}).ToList();
           }
 
           return NotFound();
