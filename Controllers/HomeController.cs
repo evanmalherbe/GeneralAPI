@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GeneralAPI.Data;
 using GeneralAPI.Models;
+using GeneralAPI.TransferObjects;
 
 namespace GeneralAPI.Controllers
 {
@@ -36,15 +37,49 @@ namespace GeneralAPI.Controllers
 
         // GET: 
         [HttpGet("/about")]
-        public async Task<ActionResult<List<FrameworkResponseDTO>>> GetAboutData()
+        public async Task<ActionResult<AboutResponseDTO>> GetAboutData()
         {
-          List<Framework> list = await _context.Framework.Where(i => i.IsDisplay == true).ToListAsync();
-          if (list.Count > 0)
+          List<WorkExperienceResponseDTO> workList = await _context.WorkExperience
+                                                    .Where(i => i.IsDisplay == true)
+                                                    .Select(i => new WorkExperienceResponseDTO() 
+                                                      { 
+                                                        ID = i.ID, 
+                                                        Position = i.Position != null ? i.Position.Trim() : i.Position, 
+                                                        Company = i.Company != null ? i.Company.Trim() : i.Company, 
+                                                        DatesOfEmployment = i.DatesOfEmployment != null ? i.DatesOfEmployment.Trim() : i.DatesOfEmployment, 
+                                                        Description = i.Description != null ? i.Description.Trim() : i.Description
+                                                      })
+                                                    .ToListAsync();
+         
+          if (workList.Count == 0)
           {
-            return list.Select(i => new FrameworkResponseDTO() { ID = i.ID, Name = i.Name}).ToList();
+            workList = new List<WorkExperienceResponseDTO>();
           }
 
-          return NotFound(new List<FrameworkResponseDTO>());
+          List<EducationResponseDTO> educationList = await _context.Education
+                                                                .Where(i => i.IsDisplay == true)
+                                                                .Select(i => new EducationResponseDTO()
+                                                                {
+                                                                  Institution = i.Institution,
+                                                                  DegreeCourse = i.DegreeCourse,
+                                                                  YearComplete = i.YearComplete,
+                                                                  Link = i.Link
+                                                                })
+                                                                .ToListAsync();
+       
+          if (educationList.Count > 0)
+          {
+            educationList = new List<EducationResponseDTO>();
+          }
+
+          AboutResponseDTO dto = new AboutResponseDTO()
+          {
+            Education = educationList,
+            Work = workList
+          };
+
+          // success
+          return dto;
         }
 
         // GET: api/Home/5

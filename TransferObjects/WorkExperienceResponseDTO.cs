@@ -1,15 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace GeneralAPI.Models
+﻿namespace GeneralAPI.TransferObjects
 {
-	[Table("Work_Experience")]
-	public class WorkExperience
+	public class WorkExperienceResponseDTO
 	{
 		public int ID { get; set; }
 		public string? Position { get; set; }
 		public string? Company { get; set; }
 		public string? DatesOfEmployment { get; set; }
 		public string? Description { get; set; }
-		public bool IsDisplay { get; set; }
 	}
 }

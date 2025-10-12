@@ -1,4 +1,4 @@
-﻿namespace GeneralAPI.Models
+﻿namespace GeneralAPI.TransferObjects
 {
 	public class FrameworkResponseDTO
 	{

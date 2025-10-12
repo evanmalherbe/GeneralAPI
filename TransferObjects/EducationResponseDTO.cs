@@ -1,12 +1,11 @@
-﻿namespace GeneralAPI.Models
+﻿namespace GeneralAPI.TransferObjects
 {
-	public class Education
+	public class EducationResponseDTO
 	{
 		public int ID { get; set; }
 		public string? Institution { get; set; }
 		public string? DegreeCourse { get; set; }
 		public string? YearComplete { get; set; }
 		public string? Link { get; set; }
-		public bool IsDisplay { get; set; }
 	}
 }
