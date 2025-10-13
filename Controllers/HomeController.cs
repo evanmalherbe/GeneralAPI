@@ -41,13 +41,14 @@ namespace GeneralAPI.Controllers
         {
           List<WorkExperienceResponseDTO> workList = await _context.WorkExperience
                                                     .Where(i => i.IsDisplay == true)
+                                                    .OrderByDescending(i => i.ID)
                                                     .Select(i => new WorkExperienceResponseDTO() 
                                                       { 
                                                         ID = i.ID, 
-                                                        Position = i.Position != null ? i.Position.Trim() : i.Position, 
-                                                        Company = i.Company != null ? i.Company.Trim() : i.Company, 
-                                                        DatesOfEmployment = i.DatesOfEmployment != null ? i.DatesOfEmployment.Trim() : i.DatesOfEmployment, 
-                                                        Description = i.Description != null ? i.Description.Trim() : i.Description
+                                                        Position = i.Position, 
+                                                        Company = i.Company, 
+                                                        DatesOfEmployment = i.DatesOfEmployment, 
+                                                        Description = i.Description
                                                       })
                                                     .ToListAsync();
          
@@ -58,6 +59,7 @@ namespace GeneralAPI.Controllers
 
           List<EducationResponseDTO> educationList = await _context.Education
                                                                 .Where(i => i.IsDisplay == true)
+                                                                .OrderByDescending(i => i.ID)
                                                                 .Select(i => new EducationResponseDTO()
                                                                 {
                                                                   Institution = i.Institution,
