@@ -23,7 +23,7 @@ namespace GeneralAPI.Controllers
         }
 
         // GET: 
-        [HttpGet("/framework")]
+        [HttpGet("framework")]
         public async Task<ActionResult<List<FrameworkResponseDTO>>> GetFramework()
         {
           List<Framework> list = await _context.Framework.Where(i => i.IsDisplay == true).ToListAsync();
@@ -36,7 +36,7 @@ namespace GeneralAPI.Controllers
         }
 
         // GET: 
-        [HttpGet("/about")]
+        [HttpGet("about")]
         public async Task<ActionResult<AboutResponseDTO>> GetAboutData()
         {
           List<WorkExperienceResponseDTO> workList = await _context.WorkExperience
@@ -67,7 +67,7 @@ namespace GeneralAPI.Controllers
                                                                 })
                                                                 .ToListAsync();
        
-          if (educationList.Count > 0)
+          if (educationList.Count == 0)
           {
             educationList = new List<EducationResponseDTO>();
           }
