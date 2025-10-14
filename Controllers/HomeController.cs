@@ -73,9 +73,16 @@ namespace GeneralAPI.Controllers
           {
             educationList = new List<EducationResponseDTO>();
           }
+          string aboutText = "";
+          string? aboutTextRaw = await _context.ContentSource.Where(i => i.IsDisplay == true && i.ContentName == "About").Select(i => i.ContentBody).FirstOrDefaultAsync();
 
+          if (aboutTextRaw != null) 
+          {
+            aboutText = aboutTextRaw;
+          }
           AboutResponseDTO dto = new AboutResponseDTO()
           {
+            AboutText = aboutText,
             Education = educationList,
             Work = workList
           };
