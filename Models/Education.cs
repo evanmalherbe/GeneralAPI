@@ -7,6 +7,7 @@
 		public string? DegreeCourse { get; set; }
 		public string? YearComplete { get; set; }
 		public string? Link { get; set; }
+		public string? LinkText { get; set; }
 		public bool IsDisplay { get; set; }
 	}
 }

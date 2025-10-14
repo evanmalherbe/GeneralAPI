@@ -65,7 +65,8 @@ namespace GeneralAPI.Controllers
                                                                   Institution = i.Institution,
                                                                   DegreeCourse = i.DegreeCourse,
                                                                   YearComplete = i.YearComplete,
-                                                                  Link = i.Link
+                                                                  Link = i.Link,
+                                                                  LinkText = i.LinkText
                                                                 })
                                                                 .ToListAsync();
        
