@@ -29,7 +29,16 @@ namespace GeneralAPI.Controllers
           List<Framework> list = await _context.Framework.Where(i => i.IsDisplay == true).ToListAsync();
           if (list.Count > 0)
           {
-            return list.Select(i => new FrameworkResponseDTO() { ID = i.ID, Name = i.Name}).ToList();
+            return list
+                    .OrderBy(i => i.Order)
+                    .Select(i => new FrameworkResponseDTO() 
+                            {
+                              ID = i.ID, 
+                              Name = i.Name, 
+                              Order = i.Order,
+                              IconClassPath = i.IconClassPath,
+                              IconType = i.IconType})
+                    .ToList();
           }
 
           return NotFound(new List<FrameworkResponseDTO>());
