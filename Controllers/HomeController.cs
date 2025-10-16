@@ -129,7 +129,9 @@ namespace GeneralAPI.Controllers
                               ID = i.ID, 
                               Name = i.Name, 
                               GithubLink = i.GithubLink,
-                              LiveLink = i.LiveLink})
+                              LiveLink = i.LiveLink,
+                              Description = i.Description,
+                              Technologies = i.Technologies})
                     .ToList();
           }
 

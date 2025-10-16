@@ -11,5 +11,7 @@ namespace GeneralAPI.Models
 		public string? LiveLink { get; set; }
 		public bool IsDisplay { get; set; }
 		public int Order { get; set; }
+		public string? Description { get; set; }
+		public string? Technologies { get; set; }
 	}
 }
