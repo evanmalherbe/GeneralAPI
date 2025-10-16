@@ -172,7 +172,7 @@ namespace GeneralAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Framework>> PostFramework(Framework framework)
         {
-            _context.Framework.Add(framework);
+            _context.Frameworks.Add(framework);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetFramework", new { id = framework.ID }, framework);
@@ -182,13 +182,13 @@ namespace GeneralAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFramework(int id)
         {
-            var framework = await _context.Framework.FindAsync(id);
+            var framework = await _context.Frameworks.FindAsync(id);
             if (framework == null)
             {
                 return NotFound();
             }
 
-            _context.Framework.Remove(framework);
+            _context.Frameworks.Remove(framework);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -196,7 +196,7 @@ namespace GeneralAPI.Controllers
 
         private bool FrameworkExists(int id)
         {
-            return _context.Framework.Any(e => e.ID == id);
+            return _context.Frameworks.Any(e => e.ID == id);
         }
     }
 }
