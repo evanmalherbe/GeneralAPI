@@ -11,194 +11,197 @@ using GeneralAPI.TransferObjects;
 
 namespace GeneralAPI.Controllers
 {
-    [Route("api/home")]
-    [ApiController]
-    public class HomeController : ControllerBase
-    {
-        private readonly PlatformAlphaContext _context;
+	[Route("api/home")]
+	[ApiController]
+	public class HomeController : ControllerBase
+	{
+		private readonly PlatformAlphaContext _context;
 
-        public HomeController(PlatformAlphaContext context)
-        {
-            _context = context;
-        }
+		public HomeController(PlatformAlphaContext context)
+		{
+			_context = context;
+		}
 
-        // GET: 
-        [HttpGet("framework")]
-        public async Task<ActionResult<List<FrameworkResponseDTO>>> GetFramework()
-        {
-          List<Framework> list = await _context.Frameworks.Where(i => i.IsDisplay == true).ToListAsync();
-          if (list.Count > 0)
-          {
-            return list
-                    .OrderBy(i => i.Order)
-                    .Select(i => new FrameworkResponseDTO() 
-                            {
-                              ID = i.ID, 
-                              Name = i.Name, 
-                              Order = i.Order,
-                              IconClassPath = i.IconClassPath,
-                              IconType = i.IconType})
-                    .ToList();
-          }
+		// GET: 
+		[HttpGet("framework")]
+		public async Task<ActionResult<List<FrameworkResponseDTO>>> GetFramework()
+		{
+			List<Framework> list = await _context.Frameworks.Where(i => i.IsDisplay == true).ToListAsync();
+			if (list.Count > 0)
+			{
+				return list
+								.OrderBy(i => i.Order)
+								.Select(i => new FrameworkResponseDTO()
+								{
+									ID = i.ID,
+									Name = i.Name,
+									Order = i.Order,
+									IconClassPath = i.IconClassPath,
+									IconType = i.IconType
+								})
+								.ToList();
+			}
 
-          return NotFound(new List<FrameworkResponseDTO>());
-        }
+			return NotFound(new List<FrameworkResponseDTO>());
+		}
 
-        // GET: 
-        [HttpGet("about")]
-        public async Task<ActionResult<AboutResponseDTO>> GetAboutData()
-        {
-          List<WorkExperienceResponseDTO> workList = await _context.WorkExperiences
-                                                    .Where(i => i.IsDisplay == true)
-                                                    .OrderByDescending(i => i.ID)
-                                                    .Select(i => new WorkExperienceResponseDTO() 
-                                                      { 
-                                                        ID = i.ID, 
-                                                        Position = i.Position, 
-                                                        Company = i.Company, 
-                                                        DatesOfEmployment = i.DatesOfEmployment, 
-                                                        Description = i.Description
-                                                      })
-                                                    .ToListAsync();
-         
-          if (workList.Count == 0)
-          {
-            workList = new List<WorkExperienceResponseDTO>();
-          }
+		// GET: 
+		[HttpGet("about")]
+		public async Task<ActionResult<AboutResponseDTO>> GetAboutData()
+		{
+			List<WorkExperienceResponseDTO> workList = await _context.WorkExperiences
+																								.Where(i => i.IsDisplay == true)
+																								.OrderByDescending(i => i.ID)
+																								.Select(i => new WorkExperienceResponseDTO()
+																								{
+																									ID = i.ID,
+																									Position = i.Position,
+																									Company = i.Company,
+																									DatesOfEmployment = i.DatesOfEmployment,
+																									Description = i.Description
+																								})
+																								.ToListAsync();
 
-          List<EducationResponseDTO> educationList = await _context.Educations
-                                                                .Where(i => i.IsDisplay == true)
-                                                                .OrderByDescending(i => i.ID)
-                                                                .Select(i => new EducationResponseDTO()
-                                                                {
-                                                                  Institution = i.Institution,
-                                                                  DegreeCourse = i.DegreeCourse,
-                                                                  YearComplete = i.YearComplete,
-                                                                  Link = i.Link,
-                                                                  LinkText = i.LinkText
-                                                                })
-                                                                .ToListAsync();
-       
-          if (educationList.Count == 0)
-          {
-            educationList = new List<EducationResponseDTO>();
-          }
-          string aboutText = "";
-          string? aboutTextRaw = await _context.ContentSources.Where(i => i.IsDisplay == true && i.ContentName == "About").Select(i => i.ContentBody).FirstOrDefaultAsync();
+			if (workList.Count == 0)
+			{
+				workList = new List<WorkExperienceResponseDTO>();
+			}
 
-          if (aboutTextRaw != null) 
-          {
-            aboutText = aboutTextRaw;
-          }
-          AboutResponseDTO dto = new AboutResponseDTO()
-          {
-            AboutText = aboutText,
-            Education = educationList,
-            Work = workList
-          };
+			List<EducationResponseDTO> educationList = await _context.Educations
+																														.Where(i => i.IsDisplay == true)
+																														.OrderByDescending(i => i.ID)
+																														.Select(i => new EducationResponseDTO()
+																														{
+																															Institution = i.Institution,
+																															DegreeCourse = i.DegreeCourse,
+																															YearComplete = i.YearComplete,
+																															Link = i.Link,
+																															LinkText = i.LinkText
+																														})
+																														.ToListAsync();
 
-          // success
-          return dto;
-        }
+			if (educationList.Count == 0)
+			{
+				educationList = new List<EducationResponseDTO>();
+			}
+			string aboutText = "";
+			string? aboutTextRaw = await _context.ContentSources.Where(i => i.IsDisplay == true && i.ContentName == "About").Select(i => i.ContentBody).FirstOrDefaultAsync();
 
-        // GET: api/Home/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Framework>> GetFramework(int id)
-        {
-            var framework = await _context.Frameworks.FindAsync(id);
+			if (aboutTextRaw != null)
+			{
+				aboutText = aboutTextRaw;
+			}
+			AboutResponseDTO dto = new AboutResponseDTO()
+			{
+				AboutText = aboutText,
+				Education = educationList,
+				Work = workList
+			};
 
-            if (framework == null)
-            {
-                return NotFound();
-            }
+			// success
+			return dto;
+		}
 
-            return framework;
-        }
+		// GET: api/Home/5
+		[HttpGet("{id}")]
+		public async Task<ActionResult<Framework>> GetFramework(int id)
+		{
+			var framework = await _context.Frameworks.FindAsync(id);
 
-        // GET: 
-        [HttpGet("projects")]
-        public async Task<ActionResult<List<ProjectDTO>>> GetProjects()
-        {
-          List<Project> list = await _context.Projects.Where(i => i.IsDisplay == true).ToListAsync();
-          if (list.Count > 0)
-          {
-            return list
-                    .OrderBy(i => i.Order)
-                    .Select(i => new ProjectDTO() 
-                            {
-                              ID = i.ID, 
-                              Name = i.Name, 
-                              GithubLink = i.GithubLink,
-                              LiveLink = i.LiveLink,
-                              Description = i.Description,
-                              Technologies = i.Technologies})
-                    .ToList();
-          }
+			if (framework == null)
+			{
+				return NotFound();
+			}
 
-          return NotFound(new List<ProjectDTO>());
-        }
+			return framework;
+		}
 
-        // PUT: api/Home/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutFramework(int id, Framework framework)
-        {
-            if (id != framework.ID)
-            {
-                return BadRequest();
-            }
+		// GET: 
+		[HttpGet("projects")]
+		public async Task<ActionResult<List<ProjectDTO>>> GetProjects()
+		{
+			List<Project> list = await _context.Projects.Where(i => i.IsDisplay == true).ToListAsync();
+			if (list.Count > 0)
+			{
+				return list
+								.OrderBy(i => i.Order)
+								.Select(i => new ProjectDTO()
+								{
+									ID = i.ID,
+									Name = i.Name,
+									GithubLink = i.GithubLink,
+									LiveLink = i.LiveLink,
+									Description = i.Description,
+									Technologies = i.Technologies,
+									ImagePath = i.ImagePath
+								})
+								.ToList();
+			}
 
-            _context.Entry(framework).State = EntityState.Modified;
+			return NotFound(new List<ProjectDTO>());
+		}
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!FrameworkExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+		// PUT: api/Home/5
+		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+		[HttpPut("{id}")]
+		public async Task<IActionResult> PutFramework(int id, Framework framework)
+		{
+			if (id != framework.ID)
+			{
+				return BadRequest();
+			}
 
-            return NoContent();
-        }
+			_context.Entry(framework).State = EntityState.Modified;
 
-        // POST: api/Home
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Framework>> PostFramework(Framework framework)
-        {
-            _context.Frameworks.Add(framework);
-            await _context.SaveChangesAsync();
+			try
+			{
+				await _context.SaveChangesAsync();
+			}
+			catch (DbUpdateConcurrencyException)
+			{
+				if (!FrameworkExists(id))
+				{
+					return NotFound();
+				}
+				else
+				{
+					throw;
+				}
+			}
 
-            return CreatedAtAction("GetFramework", new { id = framework.ID }, framework);
-        }
+			return NoContent();
+		}
 
-        // DELETE: api/Home/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteFramework(int id)
-        {
-            var framework = await _context.Frameworks.FindAsync(id);
-            if (framework == null)
-            {
-                return NotFound();
-            }
+		// POST: api/Home
+		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+		[HttpPost]
+		public async Task<ActionResult<Framework>> PostFramework(Framework framework)
+		{
+			_context.Frameworks.Add(framework);
+			await _context.SaveChangesAsync();
 
-            _context.Frameworks.Remove(framework);
-            await _context.SaveChangesAsync();
+			return CreatedAtAction("GetFramework", new { id = framework.ID }, framework);
+		}
 
-            return NoContent();
-        }
+		// DELETE: api/Home/5
+		[HttpDelete("{id}")]
+		public async Task<IActionResult> DeleteFramework(int id)
+		{
+			var framework = await _context.Frameworks.FindAsync(id);
+			if (framework == null)
+			{
+				return NotFound();
+			}
 
-        private bool FrameworkExists(int id)
-        {
-            return _context.Frameworks.Any(e => e.ID == id);
-        }
-    }
+			_context.Frameworks.Remove(framework);
+			await _context.SaveChangesAsync();
+
+			return NoContent();
+		}
+
+		private bool FrameworkExists(int id)
+		{
+			return _context.Frameworks.Any(e => e.ID == id);
+		}
+	}
 }
