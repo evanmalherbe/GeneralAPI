@@ -14,9 +14,10 @@ namespace GeneralAPI.Data
 		{
 		}
 
-		public DbSet<Framework> Framework { get; set; } = default!;
-		public DbSet<Education> Education { get; set; } = default!;
-		public DbSet<WorkExperience> WorkExperience { get; set; } = default!;
-		public DbSet<ContentSource> ContentSource { get; set; } = default!;
+		public DbSet<Framework> Frameworks { get; set; } = default!;
+		public DbSet<Education> Educations { get; set; } = default!;
+		public DbSet<WorkExperience> WorkExperiences { get; set; } = default!;
+		public DbSet<ContentSource> ContentSources { get; set; } = default!;
+		public DbSet<Project> Projects { get; set; } = default!;
 	}
 }

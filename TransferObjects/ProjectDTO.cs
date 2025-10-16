@@ -1,0 +1,10 @@
+﻿namespace GeneralAPI.TransferObjects
+{
+	public class ProjectDTO
+	{
+		public int ID { get; set; }
+		public string? Name { get; set; }
+		public string? GithubLink { get; set; }
+		public string? LiveLink { get; set; }
+	}
+}

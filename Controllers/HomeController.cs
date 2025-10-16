@@ -26,7 +26,7 @@ namespace GeneralAPI.Controllers
         [HttpGet("framework")]
         public async Task<ActionResult<List<FrameworkResponseDTO>>> GetFramework()
         {
-          List<Framework> list = await _context.Framework.Where(i => i.IsDisplay == true).ToListAsync();
+          List<Framework> list = await _context.Frameworks.Where(i => i.IsDisplay == true).ToListAsync();
           if (list.Count > 0)
           {
             return list
@@ -48,7 +48,7 @@ namespace GeneralAPI.Controllers
         [HttpGet("about")]
         public async Task<ActionResult<AboutResponseDTO>> GetAboutData()
         {
-          List<WorkExperienceResponseDTO> workList = await _context.WorkExperience
+          List<WorkExperienceResponseDTO> workList = await _context.WorkExperiences
                                                     .Where(i => i.IsDisplay == true)
                                                     .OrderByDescending(i => i.ID)
                                                     .Select(i => new WorkExperienceResponseDTO() 
@@ -66,7 +66,7 @@ namespace GeneralAPI.Controllers
             workList = new List<WorkExperienceResponseDTO>();
           }
 
-          List<EducationResponseDTO> educationList = await _context.Education
+          List<EducationResponseDTO> educationList = await _context.Educations
                                                                 .Where(i => i.IsDisplay == true)
                                                                 .OrderByDescending(i => i.ID)
                                                                 .Select(i => new EducationResponseDTO()
@@ -84,7 +84,7 @@ namespace GeneralAPI.Controllers
             educationList = new List<EducationResponseDTO>();
           }
           string aboutText = "";
-          string? aboutTextRaw = await _context.ContentSource.Where(i => i.IsDisplay == true && i.ContentName == "About").Select(i => i.ContentBody).FirstOrDefaultAsync();
+          string? aboutTextRaw = await _context.ContentSources.Where(i => i.IsDisplay == true && i.ContentName == "About").Select(i => i.ContentBody).FirstOrDefaultAsync();
 
           if (aboutTextRaw != null) 
           {
@@ -105,7 +105,7 @@ namespace GeneralAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Framework>> GetFramework(int id)
         {
-            var framework = await _context.Framework.FindAsync(id);
+            var framework = await _context.Frameworks.FindAsync(id);
 
             if (framework == null)
             {
@@ -113,6 +113,27 @@ namespace GeneralAPI.Controllers
             }
 
             return framework;
+        }
+
+        // GET: 
+        [HttpGet("projects")]
+        public async Task<ActionResult<List<ProjectDTO>>> GetProjects()
+        {
+          List<Project> list = await _context.Projects.Where(i => i.IsDisplay == true).ToListAsync();
+          if (list.Count > 0)
+          {
+            return list
+                    .OrderBy(i => i.Order)
+                    .Select(i => new ProjectDTO() 
+                            {
+                              ID = i.ID, 
+                              Name = i.Name, 
+                              GithubLink = i.GithubLink,
+                              LiveLink = i.LiveLink})
+                    .ToList();
+          }
+
+          return NotFound(new List<ProjectDTO>());
         }
 
         // PUT: api/Home/5
