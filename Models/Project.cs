@@ -1,5 +1,8 @@
-﻿namespace GeneralAPI.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace GeneralAPI.Models
 {
+	[Table("Project")]
 	public class Project
 	{
 		public int ID { get; set; }
