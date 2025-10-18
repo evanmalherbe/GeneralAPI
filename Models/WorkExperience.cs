@@ -2,7 +2,7 @@
 
 namespace GeneralAPI.Models
 {
-	[Table("Work_Experience")]
+	//[Table("Work_Experience")]
 	public class WorkExperience
 	{
 		public int ID { get; set; }

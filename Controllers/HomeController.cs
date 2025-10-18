@@ -15,9 +15,9 @@ namespace GeneralAPI.Controllers
 	[ApiController]
 	public class HomeController : ControllerBase
 	{
-		private readonly PlatformAlphaContext _context;
+		private readonly PlatformXContext _context;
 
-		public HomeController(PlatformAlphaContext context)
+		public HomeController(PlatformXContext context)
 		{
 			_context = context;
 		}
@@ -93,7 +93,7 @@ namespace GeneralAPI.Controllers
 			}
 			AboutResponseDTO dto = new AboutResponseDTO()
 			{
-				AboutText = aboutText,
+				AboutText = aboutText ?? "",
 				Education = educationList,
 				Work = workList
 			};

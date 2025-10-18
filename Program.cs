@@ -6,9 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 //    options.UseSqlServer(builder.Configuration.GetConnectionString("PlatformAlphaContext") ?? throw new InvalidOperationException("Connection string 'PlatformAlphaContext' not found.")));
 
 // Include retry settings for when server is asleep and takes long to respond
-builder.Services.AddDbContext<PlatformAlphaContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("PlatformAlphaContext") 
-    ?? throw new InvalidOperationException("Connection string 'PlatformAlphaContext' not found."),
+builder.Services.AddDbContext<PlatformXContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("LocalPlatformXContext") 
+    ?? throw new InvalidOperationException("Connection string 'LocalPlatformXContext' not found."),
     sqlOptions =>
         {
             sqlOptions.EnableRetryOnFailure(
