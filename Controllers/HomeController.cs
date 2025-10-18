@@ -37,7 +37,8 @@ namespace GeneralAPI.Controllers
 									Name = i.Name,
 									Order = i.Order,
 									IconClassPath = i.IconClassPath,
-									IconType = i.IconType
+									IconType = i.IconType,
+									BackgroundColour = i.BackgroundColour
 								})
 								.ToList();
 			}

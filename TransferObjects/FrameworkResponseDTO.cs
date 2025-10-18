@@ -7,5 +7,6 @@
 		public int? Order { get; set; } = 0;
 		public string IconClassPath { get; set; } = string.Empty;
 		public string IconType { get; set; } = string.Empty;
+		public string BackgroundColour { get; set; } = string.Empty;
 	}
 }
