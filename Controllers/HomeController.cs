@@ -52,7 +52,7 @@ namespace GeneralAPI.Controllers
 		{
 			List<WorkExperienceResponseDTO> workList = await _context.WorkExperience
 																								.Where(i => i.IsDisplay == true)
-																								.OrderByDescending(i => i.ID)
+																								.OrderByDescending(i => i.DatesOfEmployment)
 																								.Select(i => new WorkExperienceResponseDTO()
 																								{
 																									ID = i.ID,
@@ -70,7 +70,7 @@ namespace GeneralAPI.Controllers
 
 			List<EducationResponseDTO> educationList = await _context.Education
 																														.Where(i => i.IsDisplay == true)
-																														.OrderByDescending(i => i.ID)
+																														.OrderByDescending(i => i.YearComplete)
 																														.Select(i => new EducationResponseDTO()
 																														{
 																															Institution = i.Institution,
