@@ -16,7 +16,6 @@ namespace GeneralAPI.Controllers
 	public class HomeController : ControllerBase
 	{
 		private readonly PlatformXContext _context;
-
 		public HomeController(PlatformXContext context)
 		{
 			_context = context;
@@ -107,7 +106,7 @@ namespace GeneralAPI.Controllers
 		[HttpGet("{id}")]
 		public async Task<ActionResult<Framework>> GetFramework(int id)
 		{
-			var framework = await _context.Framework.FindAsync(id);
+			Framework? framework = await _context.Framework.FindAsync(id);
 
 			if (framework == null)
 			{
@@ -140,69 +139,6 @@ namespace GeneralAPI.Controllers
 			}
 
 			return NotFound(new List<ProjectDTO>());
-		}
-
-		// PUT: api/Home/5
-		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-		[HttpPut("{id}")]
-		public async Task<IActionResult> PutFramework(int id, Framework framework)
-		{
-			if (id != framework.ID)
-			{
-				return BadRequest();
-			}
-
-			_context.Entry(framework).State = EntityState.Modified;
-
-			try
-			{
-				await _context.SaveChangesAsync();
-			}
-			catch (DbUpdateConcurrencyException)
-			{
-				if (!FrameworkExists(id))
-				{
-					return NotFound();
-				}
-				else
-				{
-					throw;
-				}
-			}
-
-			return NoContent();
-		}
-
-		// POST: api/Home
-		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-		[HttpPost]
-		public async Task<ActionResult<Framework>> PostFramework(Framework framework)
-		{
-			_context.Framework.Add(framework);
-			await _context.SaveChangesAsync();
-
-			return CreatedAtAction("GetFramework", new { id = framework.ID }, framework);
-		}
-
-		// DELETE: api/Home/5
-		[HttpDelete("{id}")]
-		public async Task<IActionResult> DeleteFramework(int id)
-		{
-			var framework = await _context.Framework.FindAsync(id);
-			if (framework == null)
-			{
-				return NotFound();
-			}
-
-			_context.Framework.Remove(framework);
-			await _context.SaveChangesAsync();
-
-			return NoContent();
-		}
-
-		private bool FrameworkExists(int id)
-		{
-			return _context.Framework.Any(e => e.ID == id);
 		}
 	}
 }
