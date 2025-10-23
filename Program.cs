@@ -5,9 +5,9 @@ var builder = WebApplication.CreateBuilder(args);
 //    options.UseSqlServer(builder.Configuration.GetConnectionString("PlatformAlphaContext") ?? throw new InvalidOperationException("Connection string 'PlatformAlphaContext' not found.")));
 
 // Add context settings for Render PostgresSQL database
-var connectionString = builder.Configuration.GetConnectionString("RenderPlatformXContext");
+string? connectionString = builder.Configuration.GetConnectionString("RenderPlatformXContext");
 
-builder.Services.AddDbContext<PlatformXContext>(options =>
+builder.Services.AddDbContext<RenderPlatformXContext>(options =>
     options.UseNpgsql(
         connectionString,
         // The first lambda sets Npgsql-specific options (Retry Logic)

@@ -18,6 +18,6 @@ namespace GeneralAPI.Data
 		public DbSet<Education> Education { get; set; } = default!;
 		public DbSet<WorkExperience> WorkExperience { get; set; } = default!;
 		public DbSet<ContentSource> ContentSource { get; set; } = default!;
-		public DbSet<Project> Projects { get; set; } = default!;
+		public DbSet<Project> Project { get; set; } = default!;
 	}
 }

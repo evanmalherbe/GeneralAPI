@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using GeneralAPI.Data;
 using GeneralAPI.Models;
 using GeneralAPI.TransferObjects;
+using GeneralAPI.Models.PostgresSql;
 
 namespace GeneralAPI.Controllers
 {
@@ -15,8 +16,8 @@ namespace GeneralAPI.Controllers
 	[ApiController]
 	public class HomeController : ControllerBase
 	{
-		private readonly PlatformXContext _context;
-		public HomeController(PlatformXContext context)
+		private readonly RenderPlatformXContext _context;
+		public HomeController(RenderPlatformXContext context)
 		{
 			_context = context;
 		}
@@ -25,7 +26,7 @@ namespace GeneralAPI.Controllers
 		[HttpGet("framework")]
 		public async Task<ActionResult<List<FrameworkResponseDTO>>> GetFramework()
 		{
-			List<Framework> list = await _context.Framework.Where(i => i.IsDisplay == true).ToListAsync();
+			List<Framework2> list = await _context.Framework.Where(i => i.IsDisplay == true).ToListAsync();
 			if (list.Count > 0)
 			{
 				return list
@@ -104,9 +105,9 @@ namespace GeneralAPI.Controllers
 
 		// GET: api/Home/5
 		[HttpGet("{id}")]
-		public async Task<ActionResult<Framework>> GetFramework(int id)
+		public async Task<ActionResult<Framework2>> GetFramework(int id)
 		{
-			Framework? framework = await _context.Framework.FindAsync(id);
+			Framework2? framework = await _context.Framework.FindAsync(id);
 
 			if (framework == null)
 			{
@@ -120,7 +121,7 @@ namespace GeneralAPI.Controllers
 		[HttpGet("projects")]
 		public async Task<ActionResult<List<ProjectDTO>>> GetProjects()
 		{
-			List<Project> list = await _context.Projects.Where(i => i.IsDisplay == true).ToListAsync();
+			List<Project2> list = await _context.Project.Where(i => i.IsDisplay == true).ToListAsync();
 			if (list.Count > 0)
 			{
 				return list
