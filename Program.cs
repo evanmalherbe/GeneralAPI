@@ -1,23 +1,45 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using GeneralAPI.Data;
 var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddDbContext<PlatformAlphaContext>(options =>
 //    options.UseSqlServer(builder.Configuration.GetConnectionString("PlatformAlphaContext") ?? throw new InvalidOperationException("Connection string 'PlatformAlphaContext' not found.")));
 
-// Include retry settings for when server is asleep and takes long to respond
+// Add context settings for Render PostgresSQL database
+var connectionString = builder.Configuration.GetConnectionString("RenderPlatformXContext");
+
 builder.Services.AddDbContext<PlatformXContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("LocalPlatformXContext") 
-    ?? throw new InvalidOperationException("Connection string 'LocalPlatformXContext' not found."),
-    sqlOptions =>
+    options.UseNpgsql(
+        connectionString,
+        // The first lambda sets Npgsql-specific options (Retry Logic)
+        npgsqlOptions =>
         {
-            sqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 5,        // The maximum number of times to retry (e.g., 5 times)
-                maxRetryDelay: TimeSpan.FromSeconds(30), // The maximum delay (e.g., 30 seconds)
-                errorNumbersToAdd: null   // Use the default list of transient SQL error codes
+            // 1. Enable Retry Logic (Good for remote/cloud connections)
+            npgsqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5, 
+                maxRetryDelay: TimeSpan.FromSeconds(30), 
+                errorCodesToAdd: null
             );
+
+            // 2. Set Query Splitting Behavior (Good for EF performance with collections)
+            npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
         }
-    ));
+    )
+);
+
+// Old db context settings
+// Include retry settings for when server is asleep and takes long to respond
+//builder.Services.AddDbContext<PlatformXContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("RenderPlatformXContext") 
+//    ?? throw new InvalidOperationException("Connection string 'RenderPlatformXContext' not found."),
+//    sqlOptions =>
+//        {
+//            sqlOptions.EnableRetryOnFailure(
+//                maxRetryCount: 5,        // The maximum number of times to retry (e.g., 5 times)
+//                maxRetryDelay: TimeSpan.FromSeconds(30), // The maximum delay (e.g., 30 seconds)
+//                errorNumbersToAdd: null   // Use the default list of transient SQL error codes
+//            );
+//        }
+//    ));
 // Add services to the container.
 
 builder.Services.AddControllers();
