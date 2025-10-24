@@ -103,19 +103,19 @@ namespace GeneralAPI.Controllers
 			return dto;
 		}
 
-		// GET: api/Home/5
-		[HttpGet("{id}")]
-		public async Task<ActionResult<Framework2>> GetFramework(int id)
-		{
-			Framework2? framework = await _context.Framework.FindAsync(id);
+		//// GET: api/Home/5
+		//[HttpGet("{id}")]
+		//public async Task<ActionResult<Framework2>> GetFramework(int id)
+		//{
+		//	Framework2? framework = await _context.Framework.FindAsync(id);
 
-			if (framework == null)
-			{
-				return NotFound();
-			}
+		//	if (framework == null)
+		//	{
+		//		return NotFound();
+		//	}
 
-			return framework;
-		}
+		//	return framework;
+		//}
 
 		// GET: 
 		[HttpGet("projects")]
