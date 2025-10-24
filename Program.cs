@@ -56,7 +56,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Commented out for deployment to Render
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
