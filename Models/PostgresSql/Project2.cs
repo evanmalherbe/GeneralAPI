@@ -7,6 +7,7 @@ namespace GeneralAPI.Models.PostgresSql
 	{
 		[Column("id")]
 		public int ID { get; set; }
+		[Column("name")]
 		public string? Name { get; set; }
 		[Column("githublink")]
 		public string? GithubLink { get; set; }
@@ -14,8 +15,11 @@ namespace GeneralAPI.Models.PostgresSql
 		public string? LiveLink { get; set; }
 		[Column("isdisplay")]
 		public bool IsDisplay { get; set; }
+		[Column("order")]
 		public int Order { get; set; }
+		[Column("description")]
 		public string? Description { get; set; }
+		[Column("technologies")]
 		public string? Technologies { get; set; }
 		[Column("imagepath")]
 		public string? ImagePath { get; set; }
