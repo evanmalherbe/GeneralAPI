@@ -56,8 +56,6 @@ namespace GeneralAPI.Controllers
 			if (ipAddress != null && _rateLimiter.IsRateLimitExceeded(ipAddress))
 			{
 				LogWarning(logWarningEventString, emailLowercase, ipAddress, "Status code 429");
-				//LogInformation(logInformationString, System.Text.Json.JsonSerializer.Serialize(validationErrors));
-				// return 429 Too many requests status code
 				return StatusCode(429, "You have submitted too recently. Please wait a minute.");
 			}
 
@@ -73,7 +71,7 @@ namespace GeneralAPI.Controllers
 				Console.WriteLine("Suspicious activity detected (Honeypot field filled). Blocking submission");
 				LogWarning("SecurityEvent: (Contact form) Suspicious activity detected (Honeypot field filled) by user with email {Email} from IP {IPAddress}.", emailLowercase, ipAddress ?? "0", "Blocking submission");
 				// Bot detected
-				return Redirect(_frontendUrl + "ThankYou");
+				return Ok("ThankYou");
 			}
 
 			// Sanitize form field data before sending via email
@@ -102,7 +100,7 @@ namespace GeneralAPI.Controllers
 				mailMessage.To.Add(_configuration["Mail:ToAddress"] ?? "");
 				await client.SendMailAsync(mailMessage);
 
-				return Redirect(_frontendUrl + "ThankYou");
+				return Ok("Email sent");
 			}
 			catch (Exception exception)
 			{
