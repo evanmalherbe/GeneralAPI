@@ -11,6 +11,7 @@ using GeneralAPI.TransferObjects;
 using GeneralAPI.Models.PostgresSql;
 using System.Net.Mail;
 using System.Net;
+using System.Text.Encodings.Web;
 
 namespace GeneralAPI.Controllers
 {
@@ -20,11 +21,13 @@ namespace GeneralAPI.Controllers
 	{
 		private readonly RenderPlatformXContext _context;
 		private readonly IConfiguration _configuration;
+		private readonly HtmlEncoder _htmlEncoder;
 
-		public HomeController(RenderPlatformXContext context, IConfiguration configuration)
+		public HomeController(RenderPlatformXContext context, IConfiguration configuration, HtmlEncoder htmlEncoder)
 		{
 			_context = context;
 			_configuration = configuration;
+			_htmlEncoder = htmlEncoder;
 		}
 
 		// POST:
@@ -48,23 +51,29 @@ namespace GeneralAPI.Controllers
 				// Bot detected
 				return Redirect("https://localhost:7223/Home/ThankYou");
 			}
+
+			// Sanitize form field data before sending via email
+			string safeName = _htmlEncoder.Encode(dto.Name);
+			string safeEmail = _htmlEncoder.Encode(dto.Email);
+			string safeMessage = _htmlEncoder.Encode(dto.Message);
+
 			// Send email
 			try
 			{
-				var client = new SmtpClient(_configuration["Smtp:Host"], int.Parse(_configuration["Smtp:Port"]))
+				SmtpClient client = new SmtpClient(_configuration["Smtp:Host"], int.Parse(_configuration["Smtp:Port"]))
 				{
 					Credentials = new NetworkCredential(_configuration["Smtp:User"], _configuration["Smtp:Pass"]),
 					EnableSsl = true // Use SSL/TLS
 				};
 
-				var mailMessage = new MailMessage
+				MailMessage mailMessage = new MailMessage
 				{
-					From = new MailAddress(_configuration["Mail:FromAddress"]),
-					Subject = $"New Portfolio message from {dto.Name}",
-					Body = $"Name: {dto.Name}\nEmail: {dto.Email}\nMessage:\n{dto.Message}",
-					IsBodyHtml = false
+					From = new MailAddress(_configuration["Mail:FromAddress"] ?? ""),
+					Subject = $"New Contact form message from {safeName}",
+					Body = $"Name: {safeName}\nEmail: {safeEmail}\nMessage:\n{safeMessage}",
+					IsBodyHtml = false // Treat body as plain text not html
 				};
-				mailMessage.To.Add(_configuration["Mail:ToAddress"]);
+				mailMessage.To.Add(_configuration["Mail:ToAddress"] ?? "");
 				await client.SendMailAsync(mailMessage);
 
 				return Redirect("https://localhost:7223/Home/ThankYou");
