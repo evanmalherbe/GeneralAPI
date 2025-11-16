@@ -24,7 +24,7 @@ namespace GeneralAPI.Controllers
 
 		// POST:
 		[HttpPost("contact")]
-		public async Task<ActionResult<bool>> Contact(ContactDTO dto)
+		public async Task<ActionResult<bool>> Contact([FromForm] ContactDTO dto)
 		{
 			if (!ModelState.IsValid)
 			{
