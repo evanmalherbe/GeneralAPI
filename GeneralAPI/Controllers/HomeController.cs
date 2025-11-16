@@ -62,7 +62,7 @@ namespace GeneralAPI.Controllers
 			{
 				Console.WriteLine("Suspicious activity detected (Honeypot field filled). Blocking submission");
 				// Bot detected
-				return Redirect(_frontendUrl + "Home/ThankYou");
+				return Redirect(_frontendUrl + "ThankYou");
 			}
 
 			// Sanitize form field data before sending via email
@@ -91,7 +91,7 @@ namespace GeneralAPI.Controllers
 				mailMessage.To.Add(_configuration["Mail:ToAddress"] ?? "");
 				await client.SendMailAsync(mailMessage);
 
-				return Redirect(_frontendUrl + "/Home/ThankYou");
+				return Redirect(_frontendUrl + "ThankYou");
 			}
 			catch (Exception exception)
 			{
