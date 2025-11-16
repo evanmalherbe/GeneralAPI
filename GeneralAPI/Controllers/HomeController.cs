@@ -24,8 +24,18 @@ namespace GeneralAPI.Controllers
 
 		// POST:
 		[HttpPost("contact")]
-		public async Task<ActionResult<bool>> Contact()
+		public async Task<ActionResult<bool>> Contact(ContactDTO dto)
 		{
+			if (!ModelState.IsValid)
+			{
+				return BadRequest(ModelState);
+			}
+
+			if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Message)) 
+			{
+				return BadRequest(ModelState);
+			}
+
 
 
 			return true;
