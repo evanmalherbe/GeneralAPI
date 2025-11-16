@@ -39,6 +39,8 @@ builder.Services.AddCors(options =>
 });
 
 
+// add httpEncoder - for form data sanitisation
+builder.Services.AddWebEncoders();
 // Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

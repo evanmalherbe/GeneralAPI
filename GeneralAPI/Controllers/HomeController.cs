@@ -34,12 +34,7 @@ namespace GeneralAPI.Controllers
 		[HttpPost("contact")]
 		public async Task<ActionResult<bool>> Contact([FromForm] ContactDTO dto)
 		{
-			if (!ModelState.IsValid)
-			{
-				return BadRequest(ModelState);
-			}
-
-			if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Message))
+			if (!ModelState.IsValid || string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Message))
 			{
 				return BadRequest(ModelState);
 			}
@@ -56,8 +51,10 @@ namespace GeneralAPI.Controllers
 			string safeName = _htmlEncoder.Encode(dto.Name);
 			string safeEmail = _htmlEncoder.Encode(dto.Email);
 			string safeMessage = _htmlEncoder.Encode(dto.Message);
+			string timeStamp = DateTime.Now.ToString("yyyy-MMM-dd HH:mm");
+			string subjectLine = $"New Contact Form Message from {safeName} ({safeEmail}) - [{timeStamp}]";
 
-			// Send email
+			// Send email with contact form data
 			try
 			{
 				SmtpClient client = new SmtpClient(_configuration["Smtp:Host"], int.Parse(_configuration["Smtp:Port"]))
@@ -69,7 +66,7 @@ namespace GeneralAPI.Controllers
 				MailMessage mailMessage = new MailMessage
 				{
 					From = new MailAddress(_configuration["Mail:FromAddress"] ?? ""),
-					Subject = $"New Contact form message from {safeName}",
+					Subject = subjectLine,
 					Body = $"Name: {safeName}\nEmail: {safeEmail}\nMessage:\n{safeMessage}",
 					IsBodyHtml = false // Treat body as plain text not html
 				};
