@@ -25,9 +25,15 @@ namespace GeneralAPI.Controllers
 		private readonly HtmlEncoder _htmlEncoder;
 		private readonly IRateLimitingService _rateLimiter;
 		private readonly IHttpContextAccessor _httpContextAccessor;
+		private readonly ILogger<HomeController> _logger;
 		private readonly string _frontendUrl;
 
-		public HomeController(RenderPlatformXContext context, IConfiguration configuration, HtmlEncoder htmlEncoder, IHttpContextAccessor httpContextAccessor, IRateLimitingService rateLimiter)
+		public HomeController(RenderPlatformXContext context, 
+			IConfiguration configuration, 
+			HtmlEncoder htmlEncoder, 
+			IHttpContextAccessor httpContextAccessor, 
+			IRateLimitingService rateLimiter, 
+			ILogger<HomeController> logger)
 		{
 			_context = context;
 			_configuration = configuration;
@@ -35,6 +41,7 @@ namespace GeneralAPI.Controllers
 			_httpContextAccessor = httpContextAccessor;
 			_rateLimiter = rateLimiter;
 			_frontendUrl = configuration["FrontendSettings:BaseUrl"] ?? throw new InvalidOperationException("Frontend Base URL not found");
+			_logger = logger;
 		}
 
 		// POST:
@@ -43,10 +50,13 @@ namespace GeneralAPI.Controllers
 		{
 			// Get IP Address
 			string? ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
-
+			string logWarningEventString = "SecurityEvent: (Contact form) Rate limit exceeded by user with email {Email} from IP {IPAddress}.";
+			string emailLowercase = dto?.Email.ToLowerInvariant() ?? "";
 			// Rate limit check
 			if (ipAddress != null && _rateLimiter.IsRateLimitExceeded(ipAddress))
 			{
+				LogWarning(logWarningEventString, emailLowercase, ipAddress, "Status code 429");
+				//LogInformation(logInformationString, System.Text.Json.JsonSerializer.Serialize(validationErrors));
 				// return 429 Too many requests status code
 				return StatusCode(429, "You have submitted too recently. Please wait a minute.");
 			}
@@ -61,6 +71,7 @@ namespace GeneralAPI.Controllers
 			if (Request.Form.ContainsKey("hp-field") && !string.IsNullOrWhiteSpace(Request.Form["hp-field"]))
 			{
 				Console.WriteLine("Suspicious activity detected (Honeypot field filled). Blocking submission");
+				LogWarning("SecurityEvent: (Contact form) Suspicious activity detected (Honeypot field filled) by user with email {Email} from IP {IPAddress}.", emailLowercase, ipAddress ?? "0", "Blocking submission");
 				// Bot detected
 				return Redirect(_frontendUrl + "ThankYou");
 			}
@@ -203,6 +214,20 @@ namespace GeneralAPI.Controllers
 			}
 
 			return NotFound(new List<ProjectDTO>());
+		}
+		private void LogWarning(string logEventString, string emailAddress, string ipAddress, string errorMessage)
+		{
+			_logger.LogWarning(logEventString,
+					emailAddress,
+					ipAddress,
+					errorMessage);
+		}
+		private void LogInformation(string logEventString, string errors)
+		{
+			_logger.LogInformation(logEventString,
+			 _httpContextAccessor.HttpContext?.Request.Path,
+			_httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+			errors);
 		}
 	}
 }
