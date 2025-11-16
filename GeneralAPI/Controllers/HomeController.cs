@@ -31,14 +31,20 @@ namespace GeneralAPI.Controllers
 				return BadRequest(ModelState);
 			}
 
-			if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Message)) 
+			if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Message))
 			{
 				return BadRequest(ModelState);
 			}
 
+			//Check honeypot field (bot detection)
+			if (Request.Form.ContainsKey("hp-field") && !string.IsNullOrWhiteSpace(Request.Form["hp-field"]))
+			{
+				Console.WriteLine("Suspicious activity detected (Honeypot field filled). Blocking submission");
+				// Bot detected
+				return RedirectToAction("ThankYou");
+			}
 
-
-			return true;
+			return RedirectToAction("ThankYou");
 		}
 		// GET: 
 		[HttpGet("framework")]
