@@ -22,6 +22,14 @@ namespace GeneralAPI.Controllers
 			_context = context;
 		}
 
+		// POST:
+		[HttpPost("contact")]
+		public async Task<ActionResult<bool>> Contact()
+		{
+
+
+			return true;
+		}
 		// GET: 
 		[HttpGet("framework")]
 		public async Task<ActionResult<List<FrameworkResponseDTO>>> GetFramework()
