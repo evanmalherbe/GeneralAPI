@@ -33,8 +33,8 @@ builder.Services.AddCors(options =>
 {
   options.AddDefaultPolicy(policy =>
   {
-    policy.WithOrigins("https://localhost:7223")
-    //.WithOrigins("") Add deployed frontend url here
+    policy.WithOrigins("https://localhost:7223") // development url for frontend app
+    .WithOrigins("https://developerportfolionew-production.up.railway.app") // deployed url for frontend app
     .AllowAnyHeader()
     .AllowAnyMethod();
   });

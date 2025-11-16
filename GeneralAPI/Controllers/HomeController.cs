@@ -25,6 +25,7 @@ namespace GeneralAPI.Controllers
 		private readonly HtmlEncoder _htmlEncoder;
 		private readonly IRateLimitingService _rateLimiter;
 		private readonly IHttpContextAccessor _httpContextAccessor;
+		private readonly string _frontendUrl;
 
 		public HomeController(RenderPlatformXContext context, IConfiguration configuration, HtmlEncoder htmlEncoder, IHttpContextAccessor httpContextAccessor, IRateLimitingService rateLimiter)
 		{
@@ -33,6 +34,7 @@ namespace GeneralAPI.Controllers
 			_htmlEncoder = htmlEncoder;
 			_httpContextAccessor = httpContextAccessor;
 			_rateLimiter = rateLimiter;
+			_frontendUrl = configuration["FrontendSettings:BaseUrl"] ?? throw new InvalidOperationException("Frontend Base URL not found");
 		}
 
 		// POST:
@@ -60,7 +62,7 @@ namespace GeneralAPI.Controllers
 			{
 				Console.WriteLine("Suspicious activity detected (Honeypot field filled). Blocking submission");
 				// Bot detected
-				return Redirect("https://localhost:7223/Home/ThankYou");
+				return Redirect(_frontendUrl + "Home/ThankYou");
 			}
 
 			// Sanitize form field data before sending via email
@@ -89,7 +91,7 @@ namespace GeneralAPI.Controllers
 				mailMessage.To.Add(_configuration["Mail:ToAddress"] ?? "");
 				await client.SendMailAsync(mailMessage);
 
-				return Redirect("https://localhost:7223/Home/ThankYou");
+				return Redirect(_frontendUrl + "/Home/ThankYou");
 			}
 			catch (Exception exception)
 			{
