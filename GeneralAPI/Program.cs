@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using GeneralAPI.Data;
+using GeneralAPI.Interfaces;
+using GeneralAPI.Services;
 var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddDbContext<PlatformAlphaContext>(options =>
 //    options.UseSqlServer(builder.Configuration.GetConnectionString("PlatformAlphaContext") ?? throw new InvalidOperationException("Connection string 'PlatformAlphaContext' not found.")));
@@ -46,6 +48,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<IRateLimitingService, RateLimitingService>();
 
 var app = builder.Build();
 

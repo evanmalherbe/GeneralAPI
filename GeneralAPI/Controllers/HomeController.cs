@@ -12,6 +12,7 @@ using GeneralAPI.Models.PostgresSql;
 using System.Net.Mail;
 using System.Net;
 using System.Text.Encodings.Web;
+using GeneralAPI.Interfaces;
 
 namespace GeneralAPI.Controllers
 {
@@ -22,18 +23,33 @@ namespace GeneralAPI.Controllers
 		private readonly RenderPlatformXContext _context;
 		private readonly IConfiguration _configuration;
 		private readonly HtmlEncoder _htmlEncoder;
+		private readonly IRateLimitingService _rateLimiter;
+		private readonly IHttpContextAccessor _httpContextAccessor;
 
-		public HomeController(RenderPlatformXContext context, IConfiguration configuration, HtmlEncoder htmlEncoder)
+		public HomeController(RenderPlatformXContext context, IConfiguration configuration, HtmlEncoder htmlEncoder, IHttpContextAccessor httpContextAccessor, IRateLimitingService rateLimiter)
 		{
 			_context = context;
 			_configuration = configuration;
 			_htmlEncoder = htmlEncoder;
+			_httpContextAccessor = httpContextAccessor;
+			_rateLimiter = rateLimiter;
 		}
 
 		// POST:
 		[HttpPost("contact")]
 		public async Task<ActionResult<bool>> Contact([FromForm] ContactDTO dto)
 		{
+			// Get IP Address
+			string? ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+
+			// Rate limit check
+			if (ipAddress != null && _rateLimiter.IsRateLimitExceeded(ipAddress))
+			{
+				// return 429 Too many requests status code
+				return StatusCode(429, "You have submitted too recently. Please wait a minute.");
+			}
+
+			// Check form input against model
 			if (!ModelState.IsValid || string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Message))
 			{
 				return BadRequest(ModelState);
