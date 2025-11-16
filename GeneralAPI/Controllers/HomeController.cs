@@ -9,6 +9,8 @@ using GeneralAPI.Data;
 using GeneralAPI.Models;
 using GeneralAPI.TransferObjects;
 using GeneralAPI.Models.PostgresSql;
+using System.Net.Mail;
+using System.Net;
 
 namespace GeneralAPI.Controllers
 {
@@ -17,9 +19,12 @@ namespace GeneralAPI.Controllers
 	public class HomeController : ControllerBase
 	{
 		private readonly RenderPlatformXContext _context;
-		public HomeController(RenderPlatformXContext context)
+		private readonly IConfiguration _configuration;
+
+		public HomeController(RenderPlatformXContext context, IConfiguration configuration)
 		{
 			_context = context;
+			_configuration = configuration;
 		}
 
 		// POST:
@@ -41,10 +46,34 @@ namespace GeneralAPI.Controllers
 			{
 				Console.WriteLine("Suspicious activity detected (Honeypot field filled). Blocking submission");
 				// Bot detected
-				return RedirectToAction("ThankYou");
+				return Redirect("https://localhost:7223/Home/ThankYou");
 			}
+			// Send email
+			try
+			{
+				var client = new SmtpClient(_configuration["Smtp:Host"], int.Parse(_configuration["Smtp:Port"]))
+				{
+					Credentials = new NetworkCredential(_configuration["Smtp:User"], _configuration["Smtp:Pass"]),
+					EnableSsl = true // Use SSL/TLS
+				};
 
-			return RedirectToAction("ThankYou");
+				var mailMessage = new MailMessage
+				{
+					From = new MailAddress(_configuration["Mail:FromAddress"]),
+					Subject = $"New Portfolio message from {dto.Name}",
+					Body = $"Name: {dto.Name}\nEmail: {dto.Email}\nMessage:\n{dto.Message}",
+					IsBodyHtml = false
+				};
+				mailMessage.To.Add(_configuration["Mail:ToAddress"]);
+				await client.SendMailAsync(mailMessage);
+
+				return Redirect("https://localhost:7223/Home/ThankYou");
+			}
+			catch (Exception exception)
+			{
+				Console.WriteLine($"Email send error: {exception.Message}");
+				return StatusCode(500, "Error sending message. Please try again.");
+			}
 		}
 		// GET: 
 		[HttpGet("framework")]
