@@ -26,6 +26,7 @@ namespace GeneralAPI.Controllers
 		private readonly IRateLimitingService _rateLimiter;
 		private readonly IHttpContextAccessor _httpContextAccessor;
 		private readonly ILogger<HomeController> _logger;
+		private readonly ISecurityLoggingService _securityLoggingService;
 		private readonly string _frontendUrl;
 
 		public HomeController(RenderPlatformXContext context, 
@@ -33,7 +34,8 @@ namespace GeneralAPI.Controllers
 			HtmlEncoder htmlEncoder, 
 			IHttpContextAccessor httpContextAccessor, 
 			IRateLimitingService rateLimiter, 
-			ILogger<HomeController> logger)
+			ILogger<HomeController> logger,
+			ISecurityLoggingService securityLoggingService)
 		{
 			_context = context;
 			_configuration = configuration;
@@ -42,6 +44,7 @@ namespace GeneralAPI.Controllers
 			_rateLimiter = rateLimiter;
 			_frontendUrl = configuration["FrontendSettings:BaseUrl"] ?? throw new InvalidOperationException("Frontend Base URL not found");
 			_logger = logger;
+			_securityLoggingService = securityLoggingService;
 		}
 
 		// POST:
@@ -50,26 +53,27 @@ namespace GeneralAPI.Controllers
 		{
 			// Get IP Address
 			string? ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
-			string logWarningEventString = "SecurityEvent: (Contact form) Rate limit exceeded by user with email {Email} from IP {IPAddress}.";
 			string emailLowercase = dto?.Email.ToLowerInvariant() ?? "";
+			
 			// Rate limit check
 			if (ipAddress != null && _rateLimiter.IsRateLimitExceeded(ipAddress))
 			{
-				LogWarning(logWarningEventString, emailLowercase, ipAddress, "Status code 429");
+				_securityLoggingService.LogWarning(emailLowercase, "Status code 429", 1);
 				return StatusCode(429, "You have submitted too recently. Please wait a minute.");
 			}
 
 			// Check form input against model
 			if (!ModelState.IsValid || string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Message))
 			{
+				_securityLoggingService.LogFailure(emailLowercase, "Bad request");
 				return BadRequest(ModelState);
 			}
 
 			//Check honeypot field (bot detection)
 			if (Request.Form.ContainsKey("hp-field") && !string.IsNullOrWhiteSpace(Request.Form["hp-field"]))
 			{
-				Console.WriteLine("Suspicious activity detected (Honeypot field filled). Blocking submission");
-				LogWarning("SecurityEvent: (Contact form) Suspicious activity detected (Honeypot field filled) by user with email {Email} from IP {IPAddress}.", emailLowercase, ipAddress ?? "0", "Blocking submission");
+				//Console.WriteLine("Suspicious activity detected (Honeypot field filled). Blocking submission");
+				_securityLoggingService.LogWarning(emailLowercase, "Blocking submission", 2);
 				// Bot detected
 				return Ok("ThankYou");
 			}
@@ -99,7 +103,7 @@ namespace GeneralAPI.Controllers
 				};
 				mailMessage.To.Add(_configuration["Mail:ToAddress"] ?? "");
 				await client.SendMailAsync(mailMessage);
-
+				_securityLoggingService.LogSuccess(emailLowercase);
 				return Ok("Email sent");
 			}
 			catch (Exception exception)
@@ -212,20 +216,6 @@ namespace GeneralAPI.Controllers
 			}
 
 			return NotFound(new List<ProjectDTO>());
-		}
-		private void LogWarning(string logEventString, string emailAddress, string ipAddress, string errorMessage)
-		{
-			_logger.LogWarning(logEventString,
-					emailAddress,
-					ipAddress,
-					errorMessage);
-		}
-		private void LogInformation(string logEventString, string errors)
-		{
-			_logger.LogInformation(logEventString,
-			 _httpContextAccessor.HttpContext?.Request.Path,
-			_httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-			errors);
 		}
 	}
 }
