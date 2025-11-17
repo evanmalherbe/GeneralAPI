@@ -50,6 +50,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IRateLimitingService, RateLimitingService>();
+builder.Services.AddSingleton<ISecurityLoggingService, SecurityLoggingService>();
 
 var app = builder.Build();
 
