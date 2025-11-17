@@ -33,8 +33,7 @@ namespace GeneralAPI.Controllers
 			IConfiguration configuration, 
 			HtmlEncoder htmlEncoder, 
 			IHttpContextAccessor httpContextAccessor, 
-			IRateLimitingService rateLimiter, 
-			ILogger<HomeController> logger,
+			IRateLimitingService rateLimiter,
 			ISecurityLoggingService securityLoggingService)
 		{
 			_context = context;
@@ -43,7 +42,6 @@ namespace GeneralAPI.Controllers
 			_httpContextAccessor = httpContextAccessor;
 			_rateLimiter = rateLimiter;
 			_frontendUrl = configuration["FrontendSettings:BaseUrl"] ?? throw new InvalidOperationException("Frontend Base URL not found");
-			_logger = logger;
 			_securityLoggingService = securityLoggingService;
 		}
 
