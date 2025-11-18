@@ -72,7 +72,6 @@ namespace GeneralAPI.Controllers
 			//Check honeypot field (bot detection)
 			if (Request.Form.ContainsKey("hp-field") && !string.IsNullOrWhiteSpace(Request.Form["hp-field"]))
 			{
-				//Console.WriteLine("Suspicious activity detected (Honeypot field filled). Blocking submission");
 				_securityLoggingService.LogWarning(emailLowercase, "Blocking submission", 2);
 				// Bot detected
 				return Ok("ThankYou");
@@ -88,17 +87,16 @@ namespace GeneralAPI.Controllers
 
 			// Send email with contact form data
 			string mailGunApiKey = _configuration["MAILGUN_API_KEY"] ?? "";
-
 			RestClientOptions options = new RestClientOptions("https://api.mailgun.net")
 			{
 				Authenticator = new HttpBasicAuthenticator("api", mailGunApiKey)
 			};
-
 			RestClient client = new RestClient(options);
 			RestRequest request = new RestRequest("/v3/sandboxb5ce147c31d5485bb78fe3d8774b70f7.mailgun.org/messages", Method.Post);
 			request.AlwaysMultipartFormData = false;
 			request.AddParameter("from", _configuration["Mail:FromAddress"]); 
 			request.AddParameter("to", _configuration["Mail:ToAddress"]);
+			request.AddParameter("h:Reply-To", emailLowercase);
 			request.AddParameter("subject", subjectLine);
 			request.AddParameter("text", plainTextBody);
 
@@ -109,81 +107,25 @@ namespace GeneralAPI.Controllers
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine(ex.Message);
-				_securityLoggingService.LogFailure(emailLowercase, "Bad request");
+				Console.WriteLine($"Catch error: {ex?.Message}");
+				_securityLoggingService.LogFailure(emailLowercase, "Catch error");
 				return StatusCode(500, "Error sending message. Please try again.");
 			}
 
+			// Email Sent Successfully
 			if (response.IsSuccessStatusCode)
 			{
+				_securityLoggingService.LogSuccess(emailLowercase);
 				return Ok("Email Sent");
 			}
 			else
 			{
-				Console.WriteLine($"Email send error: {response.StatusCode}");
+				// Failure to send
+				_securityLoggingService.LogFailure(emailLowercase, $"Email not sent. Status: {response?.StatusCode}");
+				Console.WriteLine($"Email send error: {response?.StatusCode}");
 				return StatusCode(500, "Error sending message. Please try again.");
 			}
-			
-			//SendGridClient client = new SendGridClient(sendGridApiKey);
-			//string plainTextBody = $"Name: {safeName}\nEmail: {safeEmail}\nMessage:\n{safeMessage}";
-
-			//// Build the message object and call the SendEmailAsync method.
-			//var msg = MailHelper.CreateSingleEmail(
-			//		new EmailAddress(_configuration["Mail:FromAddress"]),
-			//		new EmailAddress(_configuration["Mail:ToAddress"]),
-			//		subjectLine,
-			//		plainTextBody,
-			//		null
-			//);
-
-			//Response response = null;
-			//try
-			//{
-			//	response = await client.SendEmailAsync(msg);
-			//}
-			//catch (Exception ex)
-			//{
-			//	Console.WriteLine(ex.Message);
-			//	_securityLoggingService.LogFailure(emailLowercase, "Bad request");
-			//	return StatusCode(500, "Error sending message. Please try again.");
-			//}
-
-			//if (response.IsSuccessStatusCode)
-			//{
-			//	return Ok("Email sent");
-			//}
-			//else 
-			//{
-			//	Console.WriteLine($"Email send error: {response.StatusCode}");
-			//	return StatusCode(500, "Error sending message. Please try again.");
-			//}
 		}
-		// Send email with contact form data
-		//try
-		//{
-		//	SmtpClient client = new SmtpClient(_configuration["Smtp:Host"], int.Parse(_configuration["Smtp:Port"]))
-		//	{
-		//		Credentials = new NetworkCredential(_configuration["Smtp:User"], _configuration["Smtp:Pass"]),
-		//		EnableSsl = true // Use SSL/TLS
-		//	};
-
-		//	MailMessage mailMessage = new MailMessage
-		//	{
-		//		From = new MailAddress(_configuration["Mail:FromAddress"] ?? ""),
-		//		Subject = subjectLine,
-		//		Body = $"Name: {safeName}\nEmail: {safeEmail}\nMessage:\n{safeMessage}",
-		//		IsBodyHtml = false // Treat body as plain text not html
-		//	};
-		//	mailMessage.To.Add(_configuration["Mail:ToAddress"] ?? "");
-		//	await client.SendMailAsync(mailMessage);
-		//	_securityLoggingService.LogSuccess(emailLowercase);
-		//	return Ok("Email sent");
-		//}
-		//catch (Exception exception)
-		//{
-		//	Console.WriteLine($"Email send error: {exception.Message}");
-		//	return StatusCode(500, "Error sending message. Please try again.");
-		//}
 		// GET: 
 		[HttpGet("framework")]
 		public async Task<ActionResult<List<FrameworkResponseDTO>>> GetFramework()

@@ -15,7 +15,7 @@ namespace GeneralAPI.Services
 		}
 		public void LogFailure(string emailAddress, string errors)
 		{
-			string logFailureInformationEventString = "SecurityEvent: Bad Request (HTTP 400). Failure to login for email {Email} on path {Path} from IP {IPAddress}. Errors: {Errors}.";
+			string logFailureInformationEventString = "SecurityEvent: (Contact form) Bad Request for user with email {Email} on path {Path} from IP {IPAddress}. Errors: {Errors}.";
 			_logger.LogInformation(logFailureInformationEventString,
 				emailAddress,
 			 _httpContextAccessor.HttpContext?.Request.Path,
