@@ -6,8 +6,8 @@ using GeneralAPI.TransferObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SendGrid;
-using SendGrid.Helpers.Mail;
+using RestSharp;
+using RestSharp.Authenticators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,10 +31,10 @@ namespace GeneralAPI.Controllers
 		private readonly ISecurityLoggingService _securityLoggingService;
 		private readonly string _frontendUrl;
 
-		public HomeController(RenderPlatformXContext context, 
-			IConfiguration configuration, 
-			HtmlEncoder htmlEncoder, 
-			IHttpContextAccessor httpContextAccessor, 
+		public HomeController(RenderPlatformXContext context,
+			IConfiguration configuration,
+			HtmlEncoder htmlEncoder,
+			IHttpContextAccessor httpContextAccessor,
 			IRateLimitingService rateLimiter,
 			ISecurityLoggingService securityLoggingService)
 		{
@@ -54,7 +54,7 @@ namespace GeneralAPI.Controllers
 			// Get IP Address
 			string? ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
 			string emailLowercase = dto?.Email.ToLowerInvariant() ?? "";
-			
+
 			// Rate limit check
 			if (ipAddress != null && _rateLimiter.IsRateLimitExceeded(ipAddress))
 			{
@@ -84,25 +84,28 @@ namespace GeneralAPI.Controllers
 			string safeMessage = _htmlEncoder.Encode(dto.Message);
 			string timeStamp = DateTime.Now.ToString("yyyy-MMM-dd HH:mm");
 			string subjectLine = $"New Contact Form Message from {safeName} ({safeEmail}) - [{timeStamp}]";
-
-			// Send email with contact form data
-			string sendGridApiKey = _configuration["SENDGRID_API_KEY"] ?? "";
-			SendGridClient client = new SendGridClient(sendGridApiKey);
 			string plainTextBody = $"Name: {safeName}\nEmail: {safeEmail}\nMessage:\n{safeMessage}";
 
-			// Build the message object and call the SendEmailAsync method.
-			var msg = MailHelper.CreateSingleEmail(
-					new EmailAddress(_configuration["Mail:FromAddress"]),
-					new EmailAddress(_configuration["Mail:ToAddress"]),
-					subjectLine,
-					plainTextBody,
-					null
-			);
+			// Send email with contact form data
+			string mailGunApiKey = _configuration["MAILGUN_API_KEY"] ?? "";
 
-			Response response = null;
+			RestClientOptions options = new RestClientOptions("https://api.mailgun.net")
+			{
+				Authenticator = new HttpBasicAuthenticator("api", mailGunApiKey)
+			};
+
+			RestClient client = new RestClient(options);
+			RestRequest request = new RestRequest("/v3/sandboxb5ce147c31d5485bb78fe3d8774b70f7.mailgun.org/messages", Method.Post);
+			request.AlwaysMultipartFormData = false;
+			request.AddParameter("from", _configuration["Mail:FromAddress"]); 
+			request.AddParameter("to", _configuration["Mail:ToAddress"]);
+			request.AddParameter("subject", subjectLine);
+			request.AddParameter("text", plainTextBody);
+
+			RestResponse response = new RestResponse();
 			try
 			{
-				response = await client.SendEmailAsync(msg);
+				response = await client.ExecuteAsync(request);
 			}
 			catch (Exception ex)
 			{
@@ -113,40 +116,74 @@ namespace GeneralAPI.Controllers
 
 			if (response.IsSuccessStatusCode)
 			{
-				return Ok("Email sent");
+				return Ok("Email Sent");
 			}
-			else 
+			else
 			{
 				Console.WriteLine($"Email send error: {response.StatusCode}");
 				return StatusCode(500, "Error sending message. Please try again.");
 			}
-		}
-		// Send email with contact form data
+			
+			//SendGridClient client = new SendGridClient(sendGridApiKey);
+			//string plainTextBody = $"Name: {safeName}\nEmail: {safeEmail}\nMessage:\n{safeMessage}";
+
+			//// Build the message object and call the SendEmailAsync method.
+			//var msg = MailHelper.CreateSingleEmail(
+			//		new EmailAddress(_configuration["Mail:FromAddress"]),
+			//		new EmailAddress(_configuration["Mail:ToAddress"]),
+			//		subjectLine,
+			//		plainTextBody,
+			//		null
+			//);
+
+			//Response response = null;
 			//try
 			//{
-			//	SmtpClient client = new SmtpClient(_configuration["Smtp:Host"], int.Parse(_configuration["Smtp:Port"]))
-			//	{
-			//		Credentials = new NetworkCredential(_configuration["Smtp:User"], _configuration["Smtp:Pass"]),
-			//		EnableSsl = true // Use SSL/TLS
-			//	};
-
-			//	MailMessage mailMessage = new MailMessage
-			//	{
-			//		From = new MailAddress(_configuration["Mail:FromAddress"] ?? ""),
-			//		Subject = subjectLine,
-			//		Body = $"Name: {safeName}\nEmail: {safeEmail}\nMessage:\n{safeMessage}",
-			//		IsBodyHtml = false // Treat body as plain text not html
-			//	};
-			//	mailMessage.To.Add(_configuration["Mail:ToAddress"] ?? "");
-			//	await client.SendMailAsync(mailMessage);
-			//	_securityLoggingService.LogSuccess(emailLowercase);
-			//	return Ok("Email sent");
+			//	response = await client.SendEmailAsync(msg);
 			//}
-			//catch (Exception exception)
+			//catch (Exception ex)
 			//{
-			//	Console.WriteLine($"Email send error: {exception.Message}");
+			//	Console.WriteLine(ex.Message);
+			//	_securityLoggingService.LogFailure(emailLowercase, "Bad request");
 			//	return StatusCode(500, "Error sending message. Please try again.");
 			//}
+
+			//if (response.IsSuccessStatusCode)
+			//{
+			//	return Ok("Email sent");
+			//}
+			//else 
+			//{
+			//	Console.WriteLine($"Email send error: {response.StatusCode}");
+			//	return StatusCode(500, "Error sending message. Please try again.");
+			//}
+		}
+		// Send email with contact form data
+		//try
+		//{
+		//	SmtpClient client = new SmtpClient(_configuration["Smtp:Host"], int.Parse(_configuration["Smtp:Port"]))
+		//	{
+		//		Credentials = new NetworkCredential(_configuration["Smtp:User"], _configuration["Smtp:Pass"]),
+		//		EnableSsl = true // Use SSL/TLS
+		//	};
+
+		//	MailMessage mailMessage = new MailMessage
+		//	{
+		//		From = new MailAddress(_configuration["Mail:FromAddress"] ?? ""),
+		//		Subject = subjectLine,
+		//		Body = $"Name: {safeName}\nEmail: {safeEmail}\nMessage:\n{safeMessage}",
+		//		IsBodyHtml = false // Treat body as plain text not html
+		//	};
+		//	mailMessage.To.Add(_configuration["Mail:ToAddress"] ?? "");
+		//	await client.SendMailAsync(mailMessage);
+		//	_securityLoggingService.LogSuccess(emailLowercase);
+		//	return Ok("Email sent");
+		//}
+		//catch (Exception exception)
+		//{
+		//	Console.WriteLine($"Email send error: {exception.Message}");
+		//	return StatusCode(500, "Error sending message. Please try again.");
+		//}
 		// GET: 
 		[HttpGet("framework")]
 		public async Task<ActionResult<List<FrameworkResponseDTO>>> GetFramework()
