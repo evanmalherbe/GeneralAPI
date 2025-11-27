@@ -51,6 +51,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IRateLimitingService, RateLimitingService>();
 builder.Services.AddSingleton<ISecurityLoggingService, SecurityLoggingService>();
+builder.Services.AddScoped<IHealthCheckService, HealthCheckService>();
 
 var app = builder.Build();
 

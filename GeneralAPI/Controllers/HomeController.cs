@@ -30,13 +30,15 @@ namespace GeneralAPI.Controllers
 		private readonly ILogger<HomeController> _logger;
 		private readonly ISecurityLoggingService _securityLoggingService;
 		private readonly string _frontendUrl;
+		private readonly IHealthCheckService _healthCheckService;
 
 		public HomeController(RenderPlatformXContext context,
 			IConfiguration configuration,
 			HtmlEncoder htmlEncoder,
 			IHttpContextAccessor httpContextAccessor,
 			IRateLimitingService rateLimiter,
-			ISecurityLoggingService securityLoggingService)
+			ISecurityLoggingService securityLoggingService,
+			IHealthCheckService healthCheckService)
 		{
 			_context = context;
 			_configuration = configuration;
@@ -45,6 +47,7 @@ namespace GeneralAPI.Controllers
 			_rateLimiter = rateLimiter;
 			_frontendUrl = configuration["FrontendSettings:BaseUrl"] ?? throw new InvalidOperationException("Frontend Base URL not found");
 			_securityLoggingService = securityLoggingService;
+			_healthCheckService = healthCheckService;
 		}
 
 		// POST:
@@ -125,6 +128,13 @@ namespace GeneralAPI.Controllers
 				Console.WriteLine($"Email send error: {response?.StatusCode}");
 				return StatusCode(500, "Error sending message. Please try again.");
 			}
+		}
+		// GET:
+		[HttpGet("ping")]
+		public async Task<ActionResult<bool>> PingDatabase()
+		{
+			bool result = await _healthCheckService.HealthCheckPing();
+			return result;
 		}
 		// GET: 
 		[HttpGet("framework")]
