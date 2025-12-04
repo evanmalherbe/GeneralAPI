@@ -429,3 +429,6 @@ FodyWeavers.xsd
 
 # Visual Studio temporary files
 **/GeneralAPI/.vs/
+
+# Configuration Files to IGNORE (The sensitive/local ones)
+appsettings.*.json
