@@ -112,47 +112,6 @@ namespace GeneralAPI.Controllers
 
 			await client.SendMailAsync(message);
 			return Ok("Email sent");
-
-			// Send email with contact form data
-			//string mailGunApiKey = _configuration["MAILGUN_API_KEY"] ?? "";
-			//RestClientOptions options = new RestClientOptions("https://api.mailgun.net")
-			//{
-			//	Authenticator = new HttpBasicAuthenticator("api", mailGunApiKey)
-			//};
-			//RestClient client = new RestClient(options);
-			//RestRequest request = new RestRequest("/v3/sandboxb5ce147c31d5485bb78fe3d8774b70f7.mailgun.org/messages", Method.Post);
-			//request.AlwaysMultipartFormData = false;
-			//request.AddParameter("from", _configuration["Mail:FromAddress"]); 
-			//request.AddParameter("to", _configuration["Mail:ToAddress"]);
-			//request.AddParameter("h:Reply-To", emailLowercase);
-			//request.AddParameter("subject", subjectLine);
-			//request.AddParameter("text", plainTextBody);
-
-			//RestResponse response = new RestResponse();
-			//try
-			//{
-			//	response = await client.ExecuteAsync(request);
-			//}
-			//catch (Exception ex)
-			//{
-			//	Console.WriteLine($"Catch error: {ex?.Message}");
-			//	_securityLoggingService.LogFailure(emailLowercase, "Catch error");
-			//	return StatusCode(500, "Error sending message. Please try again.");
-			//}
-
-			//// Email Sent Successfully
-			//if (response.IsSuccessStatusCode)
-			//{
-			//	_securityLoggingService.LogSuccess(emailLowercase);
-			//	return Ok("Email Sent");
-			//}
-			//else
-			//{
-			//	// Failure to send
-			//	_securityLoggingService.LogFailure(emailLowercase, $"Email not sent. Status: {response?.StatusCode}");
-			//	Console.WriteLine($"Email send error: {response?.StatusCode}");
-			//	return StatusCode(500, "Error sending message. Please try again.");
-			//}
 		}
 		// GET:
 		[HttpGet("ping")]
